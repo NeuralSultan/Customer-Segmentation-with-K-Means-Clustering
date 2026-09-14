@@ -2,16 +2,16 @@
 
 Unsupervised learning project that segments mall customers by income and spending behavior, built during my internship at [Elevvo Pathways](https://www.linkedin.com/company/elevvopaths/).
 
-## 📊 Dataset
+## Dataset
 
 [Mall Customers Dataset — Kaggle](https://www.kaggle.com/datasets/umytlygenc/mall-customers)
 Features used: `Annual Income (k$)` and `Spending Score (1-100)`.
 
-## 🎯 Objective
+## Objective
 
 Group customers into meaningful segments to support data-driven marketing — identifying who to target with premium offers, who needs re-engagement, and who's naturally loyal.
 
-## 🔍 Approach
+## Approach
 
 1. **Data cleaning & scaling** — prepared and standardized income/spending features.
 2. **Elbow Method** — ran K-Means for k = 1 to 10 and plotted inertia to find the optimal number of clusters.
@@ -19,7 +19,7 @@ Group customers into meaningful segments to support data-driven marketing — id
 4. **DBSCAN** — applied as a secondary check to detect outliers and non-linear cluster shapes.
 5. **Segment analysis** — computed average income/spending per cluster to interpret each group.
 
-## 📈 Results
+## Results
 
 ### Elbow Method
 
@@ -51,18 +51,18 @@ DBSCAN was run as a density-based check against the K-Means result:
 
 **Takeaway:** DBSCAN confirms the VIP segment is a real, dense cluster, but it isn't well suited to splitting the rest of the customer base — this data is closer to convex/blob-shaped, which favors K-Means. It's useful here mainly as an outlier-detection sanity check rather than a full segmentation method.
 
-## 💡 Key Takeaways
+## Key Takeaways
 
 - Income and spending score are **not correlated** — high income doesn't guarantee high spending (see Cluster 3), and low income doesn't mean low spending (see Cluster 2).
 - The clearest business opportunities are the **VIP segment (Cluster 1)** for retention/upselling and the **high-income, low-spending segment (Cluster 3)** for re-engagement campaigns.
 - K-Means with k=5 produced clean, well-separated, interpretable clusters — validated visually and by the elbow curve.
 - DBSCAN independently confirmed the VIP segment as a real dense cluster, but couldn't separate the rest of the customer base — reinforcing that K-Means was the better fit for this dataset's shape.
 
-## 🛠️ Tools
+## Tools
 
 Python · Pandas · Scikit-learn · Matplotlib · Seaborn
 
-## 📁 Repo Structure
+## Repo Structure
 
 ```
 ├── data/
@@ -76,7 +76,7 @@ Python · Pandas · Scikit-learn · Matplotlib · Seaborn
 └── requirements.txt
 ```
 
-## ▶️ Run it yourself
+## Run it yourself
 
 ```bash
 pip install -r requirements.txt
