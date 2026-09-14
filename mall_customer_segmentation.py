@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 import seaborn as sns
 
 
-df = pd.read_csv(r"F:\ML Intern Elevvo\CSV\Mall_Customers.csv")
+df = pd.read_csv(r"put your path here")
 
 print("Missing values:\n", df.isnull().sum())
 print("Duplicate rows:", df.duplicated().sum())
