@@ -67,12 +67,13 @@ Python · Pandas · Scikit-learn · Matplotlib · Seaborn
 ```
 ├── data/
 │   └── Mall_Customers.csv
-├── mall_customer_segmentation.py   # full analysis
-├── elbow_method.png
+├── LICENSE
+├── README.md
 ├── customer_segments.png
 ├── dbscan_clusters.png
-├── requirements.txt
-└── README.md
+├── elbow_method.png
+├── mall_customer_segmentation.py   # full analysis
+└── requirements.txt
 ```
 
 ## ▶️ Run it yourself
