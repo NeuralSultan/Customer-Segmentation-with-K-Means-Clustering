@@ -1,75 +1,84 @@
-# Traffic Sign Recognition with CNN (GTSRB)
+# Customer Segmentation with K-Means Clustering
 
-Deep learning project that classifies German traffic signs into 43 categories using a convolutional neural network, built during my internship at [Elevvo Pathways](https://www.linkedin.com/company/elevvopaths/).
+Unsupervised learning project that segments mall customers by income and spending behavior, built during my internship at [Elevvo Pathways](https://www.linkedin.com/company/elevvopaths/).
 
-## 📊 Dataset
+## Dataset
 
-**GTSRB — German Traffic Sign Recognition Benchmark**, 43 classes covering speed limits, warnings, prohibitions, and mandatory signs.
+[Mall Customers Dataset — Kaggle](https://www.kaggle.com/datasets/umytlygenc/mall-customers)
+Features used: `Annual Income (k$)` and `Spending Score (1-100)`.
 
-> The dataset itself isn't included in this repo (too large for GitHub). Download it from [Kaggle — GTSRB](https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign?select=Train) or the [official benchmark site](https://benchmark.ini.rub.de/gtsrb_news.html), then place it under `data/GTSRB/` (or update `data_dir` in the script to point wherever you keep it).
+## Objective
 
-## 🎯 Objective
+Group customers into meaningful segments to support data-driven marketing — identifying who to target with premium offers, who needs re-engagement, and who's naturally loyal.
 
-Build a CNN that reliably recognizes traffic signs from real-world (cropped) images — a core computer vision task for autonomous driving and driver-assistance systems.
+## Approach
 
-## 🔍 Approach
+1. **Data cleaning & scaling** — prepared and standardized income/spending features.
+2. **Elbow Method** — ran K-Means for k = 1 to 10 and plotted inertia to find the optimal number of clusters.
+3. **K-Means clustering** — fit the final model at the chosen k.
+4. **DBSCAN** — applied as a secondary check to detect outliers and non-linear cluster shapes.
+5. **Segment analysis** — computed average income/spending per cluster to interpret each group.
 
-1. **Data loading & cleaning** — parsed `Train.csv` / `Test.csv`, resolved image paths, filtered missing files.
-2. **Preprocessing** — resized all images to 64×64, rescaled pixel values, split off a 10% stratified validation set.
-3. **Augmentation** — random rotation, zoom, contrast, and translation applied at training time to improve generalization.
-4. **Model** — a 4-block CNN (Conv2D → BatchNorm → MaxPooling, filters 32→64→128→256), followed by global average pooling, dropout, and a dense softmax output over 43 classes.
-5. **Training** — Adam optimizer, sparse categorical crossentropy, with `ReduceLROnPlateau` and `EarlyStopping` callbacks (best weights restored via `ModelCheckpoint`).
-6. **Evaluation** — confusion matrix, per-class classification report, and accuracy/loss curves.
-7. **Robustness check** — re-ran predictions on the test set using an OpenCV-based preprocessing pipeline (instead of the TensorFlow one) to confirm the model performs consistently regardless of how images are loaded.
+## Results
 
-## 📈 Results
+### Elbow Method
 
-**Test accuracy: 97.47%** 🎯
+![Elbow Method](elbow_method.png)
 
-### Validation Predictions (TensorFlow pipeline)
+Inertia drops sharply up to **k=3**, keeps declining through k=4–5, then flattens from k=6 onward. The bend at **k=5** marks the point of diminishing returns, so k=5 was chosen for the final model.
 
-![TF Predictions](tf_predictions.png)
+### Customer Segments (k=5)
 
-Sample of 9 validation images with predicted vs. true labels — all correctly classified, including visually similar speed-limit signs (30 vs. 100 km/h) and low-contrast/dark images.
+![Customer Segments](customer_segments.png)
 
-### Test Predictions (OpenCV pipeline)
+| Cluster | Income | Spending | Profile |
+|---|---|---|---|
+| 0 (red) | Mid (~40–70k) | Mid (~40–60) | Mainstream customers — largest, steady segment |
+| 1 (blue) | High (~70–140k) | High (~70–100) | **VIPs** — affluent, high spenders; top target for premium offers |
+| 2 (green) | Low (~15–40k) | High (~70–100) | Aspirational spenders — spend beyond their income bracket |
+| 3 (purple) | High (~70–140k) | Low (~0–40) | Wealthy but disengaged — untapped potential, needs re-targeting |
+| 4 (orange) | Low (~15–40k) | Low (~0–40) | Budget-conscious, low engagement — lowest priority segment |
 
-![OpenCV Predictions](opencv_predictions.png)
+### DBSCAN (outlier detection)
 
-Same model, but images preprocessed via OpenCV (`cv2.imread` → BGR-to-RGB → resize) instead of the TensorFlow decode pipeline. Predictions remain accurate across all 9 samples, confirming the model isn't overfit to one specific image-loading pipeline.
+![DBSCAN Clusters](dbscan_clusters.png)
 
-### Training Curves
+DBSCAN was run as a density-based check against the K-Means result:
 
-Training vs. validation accuracy/loss tracked across epochs, with early stopping restoring the best-performing weights (see `training_curves.png`).
+- **Cluster 1 (blue)** — the high-income, high-spending group came through as a genuinely dense cluster, matching K-Means' VIP segment (Cluster 1).
+- **Cluster 0 (orange)** — nearly everyone else (low/mid income, any spending level) merged into one large blob. DBSCAN couldn't separate "aspirational spenders" from "budget-conscious" customers, since there's no density gap between them — the data is continuous, not clustered, in that region.
+- **Cluster -1 (green)** — labeled as noise/outliers. Mostly the very high earners (~110–140k) across a range of spending scores, since they're too sparse to form their own dense group.
 
-## 💡 Key Takeaways
+**Takeaway:** DBSCAN confirms the VIP segment is a real, dense cluster, but it isn't well suited to splitting the rest of the customer base — this data is closer to convex/blob-shaped, which favors K-Means. It's useful here mainly as an outlier-detection sanity check rather than a full segmentation method.
 
-- A relatively compact CNN (4 conv blocks) reaches **97.47% test accuracy** on 43 classes when paired with batch normalization, dropout, and data augmentation — architecture depth matters less than good regularization here.
-- The model generalizes across preprocessing pipelines (TensorFlow vs. OpenCV), which matters for real-world deployment where the inference pipeline may differ from training.
-- Data augmentation (rotation, zoom, contrast, translation) was key to handling the variability in sign angle, lighting, and image quality seen in the GTSRB test images.
+## Key Takeaways
 
-## 🛠️ Tools
+- Income and spending score are **not correlated** — high income doesn't guarantee high spending (see Cluster 3), and low income doesn't mean low spending (see Cluster 2).
+- The clearest business opportunities are the **VIP segment (Cluster 1)** for retention/upselling and the **high-income, low-spending segment (Cluster 3)** for re-engagement campaigns.
+- K-Means with k=5 produced clean, well-separated, interpretable clusters — validated visually and by the elbow curve.
+- DBSCAN independently confirmed the VIP segment as a real dense cluster, but couldn't separate the rest of the customer base — reinforcing that K-Means was the better fit for this dataset's shape.
 
-Python · TensorFlow/Keras · OpenCV · Pandas · NumPy · Scikit-learn · Matplotlib · Seaborn
+## Tools
 
-## 📁 Repo Structure
+Python · Pandas · Scikit-learn · Matplotlib · Seaborn
+
+## Repo Structure
 
 ```
 ├── data/
-│   └── GTSRB/                    # not included — see Dataset section above
-├── GTSRB.py                      # full training & evaluation pipeline
-├── tf_predictions.png
-├── opencv_predictions.png
-├── training_curves.png
+│   └── Mall_Customers.csv
+├── mall_customer_segmentation.py   # full analysis
+├── elbow_method.png
+├── customer_segments.png
+├── dbscan_clusters.png
 ├── requirements.txt
 └── README.md
 ```
 
-## ▶️ Run it yourself
+## Run it yourself
 
 ```bash
 pip install -r requirements.txt
-python GTSRB.py
+python Mall_Customer_Segmentation.py
 ```
 
-> Note: the script reads the dataset from a local path (`data_dir = r"..."`). Update this to point at your local copy of `data/GTSRB/` before running.
