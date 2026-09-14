@@ -67,7 +67,7 @@ Python · Pandas · Scikit-learn · Matplotlib · Seaborn
 ```
 ├── data/
 │   └── Mall_Customers.csv
-├── Mall_Customer_Segmentation.py   # full analysis
+├── mall_customer_segmentation.py   # full analysis
 ├── elbow_method.png
 ├── customer_segments.png
 ├── dbscan_clusters.png
@@ -79,7 +79,6 @@ Python · Pandas · Scikit-learn · Matplotlib · Seaborn
 
 ```bash
 pip install -r requirements.txt
-python Mall_Customer_Segmentation.py
+python mall_customer_segmentation.py
 ```
 
-> Note: the script currently reads the dataset from a local path (`df = pd.read_csv(r"...")`). Update that path to `data/Mall_Customers.csv` (or wherever you place the CSV) before running, so it works outside your own machine.
